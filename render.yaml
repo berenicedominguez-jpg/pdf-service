@@ -1,5 +1,0 @@
-services:
-  - type: web
-    name: pdf-service
-    runtime: docker
-    dockerfilePath: ./Dockerfile
