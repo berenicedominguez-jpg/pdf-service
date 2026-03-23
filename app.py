@@ -30,7 +30,7 @@ def generar_pdf():
             with open(pdf_path, 'rb') as f:
                 pdf_b64 = base64.b64encode(f.read()).decode('utf-8')
 
-        nombre = f"{datos.get('folio','REPORTE')}_{tipo.replace(' ','_')}.pdf"
+        nombre = f"{datos.get('folio','REPORTE')} - {datos.get('cliente','CLIENTE')}.pdf"
         return jsonify({'ok': True, 'pdf': pdf_b64, 'nombre': nombre})
 
     except Exception as e:
