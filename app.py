@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import base64, os, subprocess, shutil, tempfile, json
 from generators.robo import generar_robo
 from generators.abuso import generar_abuso
 from generators.credito import generar_credito
 
 app = Flask(__name__)
+CORS(app)  # Permite requests desde cualquier origen
 
 @app.route('/health', methods=['GET'])
 def health():
