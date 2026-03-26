@@ -1,18 +1,16 @@
-import os, subprocess, shutil
+import os, subprocess, shutil, zipfile
 
-BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEMBRETE_ZIP = os.path.join(BASE_DIR, 'membrete.zip')
 MEMBRETE     = os.path.join(BASE_DIR, 'membrete_unpacked')
 
 # Unzip membrete on first use
 if not os.path.exists(MEMBRETE) and os.path.exists(MEMBRETE_ZIP):
-    import zipfile
     with zipfile.ZipFile(MEMBRETE_ZIP, 'r') as z:
         z.extractall(BASE_DIR)
-LOGO_TC     = os.path.join(BASE_DIR, 'assets', 'logo_tc_transparent.png')
-LOGO_NUMARIS= os.path.join(BASE_DIR, 'assets', 'numaris_logo.png')
-PACK_SCRIPT = os.path.join(BASE_DIR, 'scripts', 'pack.py')
-SOFFICE_PY  = os.path.join(BASE_DIR, 'scripts', 'soffice.py')
+
+LOGO_TC      = os.path.join(BASE_DIR, 'assets', 'logo_tc_transparent.png')
+LOGO_NUMARIS = os.path.join(BASE_DIR, 'assets', 'numaris_logo.png')
 
 AZUL='1B2A4A'; AZUL_MED='EEF2F8'; VERDE='C6EFCE'; VERDE_T='276221'
 BLANCO='FFFFFF'; BORDE='C5D0E4'; ROJO='C00000'
@@ -133,16 +131,33 @@ def enc_pagina(folio, nick, monitorista, titulo='INFORME DE CASO'):
 </w:p>'''
 
 def build_docx_pdf(body_xml, tmpdir, nombre):
-    """Inserta body en el membrete y convierte a PDF"""
+    """Inserta body en el membrete, empaqueta como .docx y convierte a PDF con LibreOffice"""
+
+    # 1. Copiar membrete desempaquetado a carpeta temporal
     dst = os.path.join(tmpdir, 'doc')
     shutil.copytree(MEMBRETE, dst)
+
+    # 2. Leer document.xml del membrete ORIGINAL y sustituir el body
     with open(os.path.join(MEMBRETE, 'word', 'document.xml'), 'r', encoding='utf-8') as f:
         orig = f.read()
     new_doc = orig[:orig.find('<w:background')] + body_xml + '</w:document>'
     with open(os.path.join(dst, 'word', 'document.xml'), 'w', encoding='utf-8') as f:
         f.write(new_doc)
+
+    # 3. Empaquetar carpeta dst como ZIP con extensión .docx (reemplaza pack.py)
     docx_path = os.path.join(tmpdir, f'{nombre}.docx')
-    subprocess.run(['python3', PACK_SCRIPT, dst, docx_path], check=True)
-    subprocess.run(['python3', SOFFICE_PY, '--headless', '--convert-to', 'pdf',
-                    '--outdir', tmpdir, docx_path], check=True)
+    with zipfile.ZipFile(docx_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(dst):
+            for file in files:
+                abs_path = os.path.join(root, file)
+                arc_name = os.path.relpath(abs_path, dst)
+                zf.write(abs_path, arc_name)
+
+    # 4. Convertir .docx a PDF con LibreOffice (reemplaza soffice.py)
+    subprocess.run(
+        ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', tmpdir, docx_path],
+        check=True,
+        env={**os.environ, 'HOME': tmpdir}  # evita conflictos de perfil de usuario
+    )
+
     return os.path.join(tmpdir, f'{nombre}.pdf')
