@@ -78,12 +78,11 @@ def generar_abuso(d, tmpdir):
     else:
         body += imagen_placeholder('LUGAR DEL EVENTO', alto=2800)
 
-    body += sep()
-    body += tabla_texto('ACCIONES REALIZADAS', d.get('acciones','—'))
-
     # ══ HOJA 3 ══
     body += salto()
     body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
+    body += tabla_texto('ACCIONES REALIZADAS', d.get('acciones','—'))
+    body += sep()
     es_rec = 'RECUPERADA' in d.get('resultado','') and 'NO' not in d.get('resultado','')
     body += tabla(
         enc_sec('ESTATUS ACTUAL') +
@@ -95,9 +94,10 @@ def generar_abuso(d, tmpdir):
     )
     body += sep()
     body += tabla_texto('OBSERVACIONES ADICIONALES', d.get('observaciones','—'))
-    body += sep()
 
-    # Imagen(es) evidencia
+    # ══ HOJA 4 ══
+    body += salto()
+    body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
     if len(img_evidencia_raw) > 0:
         body += imagen_real('EVIDENCIA', rId_evidencia1, cx=8029440, cy=4500000)
         if len(img_evidencia_raw) > 1:
