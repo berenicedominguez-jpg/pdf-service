@@ -1,5 +1,25 @@
-import os, base64
+import os, base64, io
+from PIL import Image as PILImage
 from .utils import *
+
+# Ancho fijo para todas las imágenes (EMU) = ancho de tabla completa
+CX_FIJO = 8029440
+
+# Altos máximos permitidos por tipo (EMU). Las imágenes se escalan proporcionalmente
+# sin exceder este valor, así nunca se cortan.
+CY_MAX_MAPA = 5500000   # ~14.5cm  — mapa ocupa hoja 2 completa
+CY_MAX_EVID = 4500000   # ~11.8cm  — permite 2 evidencias juntas en hoja 4
+
+def cy_proporcional(b64_str, cy_max):
+    """Calcula cy según el aspect ratio real de la imagen, sin exceder cy_max."""
+    try:
+        img_data = base64.b64decode(b64_str)
+        img = PILImage.open(io.BytesIO(img_data))
+        w, h = img.size
+        cy = int(CX_FIJO * h / w)
+        return min(cy, cy_max)
+    except Exception:
+        return cy_max
 
 def generar_abuso(d, tmpdir):
     F = d.get('folio','—')
@@ -27,7 +47,7 @@ def generar_abuso(d, tmpdir):
     body = '<w:body>'
 
     # ══ HOJA 1 ══
-    body += enc_pagina(F, N, M, titulo='REPORTE ABUSO DE CONFIANZA')
+    body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
     body += tabla(
         enc_sec('RECEPCIÓN DEL REPORTE') +
         fila('Fecha y hora del reporte', d.get('fecha_atencion','—')) +
@@ -72,9 +92,10 @@ def generar_abuso(d, tmpdir):
     )
     body += sep()
 
-    # Imagen lugar del robo
+    # Imagen lugar del robo — ocupa todo el espacio disponible de la hoja
     if img_lugar_b64:
-        body += imagen_real('LUGAR DEL EVENTO', rId_lugar, cx=8029440, cy=3500000)
+        cy_mapa = cy_proporcional(img_lugar_b64, CY_MAX_MAPA)
+        body += imagen_real('LUGAR DEL EVENTO', rId_lugar, cx=CX_FIJO, cy=cy_mapa)
     else:
         body += imagen_placeholder('LUGAR DEL EVENTO', alto=2800)
 
@@ -95,14 +116,16 @@ def generar_abuso(d, tmpdir):
     body += sep()
     body += tabla_texto('OBSERVACIONES ADICIONALES', d.get('observaciones','—'))
 
-    # ══ HOJA 4 ══
+    # ══ HOJA 4 ══ — ambas evidencias calculadas para caber exactamente en la hoja
     body += salto()
     body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
     if len(img_evidencia_raw) > 0:
-        body += imagen_real('EVIDENCIA', rId_evidencia1, cx=8029440, cy=4000000)
+        cy_ev1 = cy_proporcional(img_evidencia_raw[0], CY_MAX_EVID)
+        body += imagen_real('EVIDENCIA', rId_evidencia1, cx=CX_FIJO, cy=cy_ev1)
         if len(img_evidencia_raw) > 1:
             body += sep()
-            body += imagen_real('EVIDENCIA (2)', rId_evidencia2, cx=8029440, cy=4000000)
+            cy_ev2 = cy_proporcional(img_evidencia_raw[1], CY_MAX_EVID)
+            body += imagen_real('EVIDENCIA (2)', rId_evidencia2, cx=CX_FIJO, cy=cy_ev2)
     else:
         body += imagen_placeholder('EVIDENCIA', alto=3500)
 
