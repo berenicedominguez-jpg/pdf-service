@@ -202,11 +202,13 @@ def imagen_real(titulo, rId, cx=8029440, cy=4500000):
                   </pic:nvPicPr>
                   <pic:blipFill>
                     <a:blip r:embed="{rId}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
+                    <a:srcRect/>
                     <a:stretch><a:fillRect/></a:stretch>
                   </pic:blipFill>
                   <pic:spPr>
                     <a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm>
                     <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
+                    <a:noFill/>
                   </pic:spPr>
                 </pic:pic>
               </a:graphicData>
