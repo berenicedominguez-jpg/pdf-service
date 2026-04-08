@@ -202,13 +202,11 @@ def imagen_real(titulo, rId, cx=8029440, cy=4500000):
                   </pic:nvPicPr>
                   <pic:blipFill>
                     <a:blip r:embed="{rId}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
-                    <a:srcRect/>
                     <a:stretch><a:fillRect/></a:stretch>
                   </pic:blipFill>
                   <pic:spPr>
                     <a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm>
                     <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-                    <a:noFill/>
                   </pic:spPr>
                 </pic:pic>
               </a:graphicData>
@@ -221,8 +219,8 @@ def imagen_real(titulo, rId, cx=8029440, cy=4500000):
   </w:tr>
 </w:tbl>'''
 
-def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId):
-    """Agrega imagen al docx y registra la relación"""
+def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId, cx_emu=None, cy_emu=None):
+    """Agrega imagen al docx, redimensionándola físicamente al tamaño target si se especifica"""
     if not img_b64:
         return False
     
@@ -231,13 +229,38 @@ def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId):
         img_b64 = img_b64[0] if img_b64 else None
     if not img_b64:
         return False
-    
-    # Detectar tipo de imagen
-    if img_b64.startswith('/9j/') or img_b64.startswith('iVBOR'):
-        ext = 'png' if img_b64.startswith('iVBOR') else 'jpg'
+
+    img_bytes = base64.b64decode(img_b64)
+
+    # Redimensionar físicamente si se proporcionan dimensiones target
+    if cx_emu and cy_emu:
+        try:
+            from PIL import Image as PILImage
+            import io
+            img = PILImage.open(io.BytesIO(img_bytes))
+            # Convertir EMU a píxeles a 96 DPI: 1 EMU = 1/914400 inches, 96 DPI
+            target_w = int(cx_emu / 914400 * 96)
+            target_h = int(cy_emu / 914400 * 96)
+            img = img.resize((target_w, target_h), PILImage.LANCZOS)
+            buf = io.BytesIO()
+            img.save(buf, format='PNG')
+            img_bytes = buf.getvalue()
+            ext = 'png'
+        except Exception:
+            # Si falla PIL, insertar original
+            if img_b64.startswith('/9j/'):
+                ext = 'jpg'
+            elif img_b64.startswith('iVBOR'):
+                ext = 'png'
+            else:
+                ext = 'png'
     else:
-        ext = 'png'
-    
+        # Detectar tipo de imagen
+        if img_b64.startswith('/9j/') or img_b64.startswith('iVBOR'):
+            ext = 'png' if img_b64.startswith('iVBOR') else 'jpg'
+        else:
+            ext = 'png'
+
     content_type = 'image/png' if ext == 'png' else 'image/jpeg'
     
     # Guardar imagen en word/media/
@@ -245,7 +268,7 @@ def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId):
     os.makedirs(media_dir, exist_ok=True)
     img_path = os.path.join(media_dir, f'{nombre_archivo}.{ext}')
     with open(img_path, 'wb') as f:
-        f.write(base64.b64decode(img_b64))
+        f.write(img_bytes)
     
     # Agregar relación en word/_rels/document.xml.rels
     rels_path = os.path.join(dst, 'word', '_rels', 'document.xml.rels')
@@ -281,7 +304,10 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None):
     # 2. Agregar imágenes si se proporcionaron
     if imagenes:
         for img_info in imagenes:
-            agregar_imagen_al_docx(dst, img_info['b64'], img_info['nombre'], img_info['rId'])
+            agregar_imagen_al_docx(
+                dst, img_info['b64'], img_info['nombre'], img_info['rId'],
+                cx_emu=img_info.get('cx'), cy_emu=img_info.get('cy')
+            )
 
     # 3. Leer document.xml del membrete ORIGINAL y sustituir el body
     with open(os.path.join(MEMBRETE, 'word', 'document.xml'), 'r', encoding='utf-8') as f:
