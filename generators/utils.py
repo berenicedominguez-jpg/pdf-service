@@ -223,8 +223,7 @@ def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId, cx_emu=None, cy_em
     """Agrega imagen al docx, redimensionándola físicamente al tamaño target si se especifica"""
     if not img_b64:
         return False
-    
-    # Si es lista, tomar el primer elemento
+
     if isinstance(img_b64, list):
         img_b64 = img_b64[0] if img_b64 else None
     if not img_b64:
@@ -232,37 +231,25 @@ def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId, cx_emu=None, cy_em
 
     img_bytes = base64.b64decode(img_b64)
 
-    # Redimensionar físicamente si se proporcionan dimensiones target
     if cx_emu and cy_emu:
         try:
             from PIL import Image as PILImage
-            import io
-            img = PILImage.open(io.BytesIO(img_bytes))
-            # Convertir EMU a píxeles a 96 DPI: 1 EMU = 1/914400 inches, 96 DPI
+            import io as _io
+            img = PILImage.open(_io.BytesIO(img_bytes))
             target_w = int(cx_emu / 914400 * 96)
             target_h = int(cy_emu / 914400 * 96)
             img = img.resize((target_w, target_h), PILImage.LANCZOS)
-            buf = io.BytesIO()
+            buf = _io.BytesIO()
             img.save(buf, format='PNG')
             img_bytes = buf.getvalue()
             ext = 'png'
         except Exception:
-            # Si falla PIL, insertar original
-            if img_b64.startswith('/9j/'):
-                ext = 'jpg'
-            elif img_b64.startswith('iVBOR'):
-                ext = 'png'
-            else:
-                ext = 'png'
-    else:
-        # Detectar tipo de imagen
-        if img_b64.startswith('/9j/') or img_b64.startswith('iVBOR'):
             ext = 'png' if img_b64.startswith('iVBOR') else 'jpg'
-        else:
-            ext = 'png'
+    else:
+        ext = 'png' if img_b64.startswith('iVBOR') else 'jpg'
 
     content_type = 'image/png' if ext == 'png' else 'image/jpeg'
-    
+
     # Guardar imagen en word/media/
     media_dir = os.path.join(dst, 'word', 'media')
     os.makedirs(media_dir, exist_ok=True)
