@@ -8,7 +8,7 @@ CX_FIJO = 8029440
 # Altos máximos permitidos por tipo (EMU). Las imágenes se escalan proporcionalmente
 # sin exceder este valor, así nunca se cortan.
 CY_MAX_MAPA = 5500000   # ~14.5cm  — mapa ocupa hoja 2 completa
-CY_MAX_EVID = 4500000   # ~11.8cm  — permite 2 evidencias juntas en hoja 4
+CY_MAX_EVID = 3800000   # ~10.0cm  — 2 imágenes + enc_pagina + sep caben en hoja 4
 
 def cy_proporcional(b64_str, cy_max):
     """Calcula cy según el aspect ratio real de la imagen, sin exceder cy_max."""
