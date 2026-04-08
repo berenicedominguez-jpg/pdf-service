@@ -47,7 +47,7 @@ def generar_abuso(d, tmpdir):
     body = '<w:body>'
 
     # ══ HOJA 1 ══
-    body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
+    body += enc_pagina(F, N, M, titulo='REPORTE ABUSO DE CONFIANZA')
     body += tabla(
         enc_sec('RECEPCIÓN DEL REPORTE') +
         fila('Fecha y hora del reporte', d.get('fecha_atencion','—')) +
