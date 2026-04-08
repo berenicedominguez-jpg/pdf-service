@@ -9,15 +9,20 @@ def generar_abuso(d, tmpdir):
     # Preparar imágenes
     imagenes = []
     img_lugar_b64 = d.get('img_lugar')
-    img_evidencia_b64 = d.get('img_evidencia')
+    img_evidencia_raw = d.get('img_evidencia', [])
+    if isinstance(img_evidencia_raw, str):
+        img_evidencia_raw = [img_evidencia_raw] if img_evidencia_raw else []
 
-    rId_lugar     = 'rId10'
-    rId_evidencia = 'rId11'
+    rId_lugar      = 'rId10'
+    rId_evidencia1 = 'rId11'
+    rId_evidencia2 = 'rId12'
 
     if img_lugar_b64:
         imagenes.append({'b64': img_lugar_b64, 'nombre': 'img_lugar', 'rId': rId_lugar})
-    if img_evidencia_b64:
-        imagenes.append({'b64': img_evidencia_b64, 'nombre': 'img_evidencia', 'rId': rId_evidencia})
+    if len(img_evidencia_raw) > 0:
+        imagenes.append({'b64': img_evidencia_raw[0], 'nombre': 'img_evidencia1', 'rId': rId_evidencia1})
+    if len(img_evidencia_raw) > 1:
+        imagenes.append({'b64': img_evidencia_raw[1], 'nombre': 'img_evidencia2', 'rId': rId_evidencia2})
 
     body = '<w:body>'
 
@@ -92,9 +97,12 @@ def generar_abuso(d, tmpdir):
     body += tabla_texto('OBSERVACIONES ADICIONALES', d.get('observaciones','—'))
     body += sep()
 
-    # Imagen evidencia
-    if img_evidencia_b64:
-        body += imagen_real('EVIDENCIA', rId_evidencia, cx=8029440, cy=4500000)
+    # Imagen(es) evidencia
+    if len(img_evidencia_raw) > 0:
+        body += imagen_real('EVIDENCIA', rId_evidencia1, cx=8029440, cy=4500000)
+        if len(img_evidencia_raw) > 1:
+            body += sep()
+            body += imagen_real('EVIDENCIA (2)', rId_evidencia2, cx=8029440, cy=4500000)
     else:
         body += imagen_placeholder('EVIDENCIA', alto=3500)
 
