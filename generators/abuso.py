@@ -74,7 +74,7 @@ def generar_abuso(d, tmpdir):
 
     # Imagen lugar del robo
     if img_lugar_b64:
-        body += imagen_real('LUGAR DEL EVENTO', rId_lugar, cx=8029440, cy=4500000)
+        body += imagen_real('LUGAR DEL EVENTO', rId_lugar, cx=8029440, cy=3500000)
     else:
         body += imagen_placeholder('LUGAR DEL EVENTO', alto=2800)
 
@@ -99,10 +99,10 @@ def generar_abuso(d, tmpdir):
     body += salto()
     body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
     if len(img_evidencia_raw) > 0:
-        body += imagen_real('EVIDENCIA', rId_evidencia1, cx=8029440, cy=4500000)
+        body += imagen_real('EVIDENCIA', rId_evidencia1, cx=8029440, cy=4000000)
         if len(img_evidencia_raw) > 1:
             body += sep()
-            body += imagen_real('EVIDENCIA (2)', rId_evidencia2, cx=8029440, cy=4500000)
+            body += imagen_real('EVIDENCIA (2)', rId_evidencia2, cx=8029440, cy=4000000)
     else:
         body += imagen_placeholder('EVIDENCIA', alto=3500)
 
