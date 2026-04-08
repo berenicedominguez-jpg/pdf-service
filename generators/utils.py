@@ -224,6 +224,12 @@ def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId):
     if not img_b64:
         return False
     
+    # Si es lista, tomar el primer elemento
+    if isinstance(img_b64, list):
+        img_b64 = img_b64[0] if img_b64 else None
+    if not img_b64:
+        return False
+    
     # Detectar tipo de imagen
     if img_b64.startswith('/9j/') or img_b64.startswith('iVBOR'):
         ext = 'png' if img_b64.startswith('iVBOR') else 'jpg'
