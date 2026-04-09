@@ -4,8 +4,8 @@ from .utils import *
 
 # Ancho fijo para todas las imágenes (EMU) = ancho de tabla completa
 CX_FIJO = 8029440
-CY_MAX_MAPA = 7199985
-CY_MAX_EVID = 4514392
+CY_MAX_MAPA = 5500000
+CY_MAX_EVID = 3800000
 
 def cx_cy_proporcional(b64_str, cx_max, cy_max):
     """Calcula cx y cy manteniendo aspect ratio, sin exceder los máximos."""
