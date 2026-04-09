@@ -349,7 +349,8 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
         # Espacio disponible debajo del encabezado
         # Encabezado ~100pts, dejar margen inferior 20pts
         CONTENT_TOP = H - 105  # justo debajo del encabezado
-        CONTENT_H = CONTENT_TOP - 20  # espacio total disponible
+        FOOTER_H = 60  # espacio del footer del membrete
+        CONTENT_H = CONTENT_TOP - FOOTER_H  # no tocar el footer
 
         n = len(evids)
         slot_h = CONTENT_H / n
