@@ -1,4 +1,3 @@
-print(f"DEBUG cx_ev1={cx_ev1} cy_ev1={cy_ev1}", flush=True)
 import os, base64, io
 from PIL import Image as PILImage
 from .utils import *
