@@ -171,7 +171,10 @@ def generar_credito(d, tmpdir):
     pdf_path  = os.path.join(tmpdir, f'{folio}.pdf')
     prs.save(pptx_path)
 
-    from .utils import SOFFICE_PY
-    subprocess.run(['python3', SOFFICE_PY, '--headless', '--convert-to', 'pdf',
-                    '--outdir', tmpdir, pptx_path], check=True)
+    from .utils import build_docx_pdf
+    subprocess.run(
+        ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', tmpdir, pptx_path],
+        check=True,
+        env={**os.environ, 'HOME': tmpdir}
+    )
     return pdf_path
