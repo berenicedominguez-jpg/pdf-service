@@ -112,19 +112,43 @@ def generar_credito(d, tmpdir):
     add_text(s3,'Resultado de rastreo de unidad en últimas ubicaciones:',
              Inches(0.5),Inches(0.3),Inches(12),Inches(0.8),size=24,color=GRIS_TEXTO)
     add_linea_h(s3,y=Inches(1.2))
-    map_box = s3.shapes.add_shape(1,Inches(1.5),Inches(1.35),Inches(10),Inches(4.8))
-    map_box.fill.solid(); map_box.fill.fore_color.rgb=RGBColor(0xEE,0xEE,0xEE)
-    map_box.line.color.rgb=RGBColor(0xCC,0xCC,0xCC)
-    add_text(s3,'[ Insertar captura del mapa GPS ]',Inches(1.5),Inches(3.5),Inches(10),Inches(0.8),
-             size=14,color=RGBColor(0xAA,0xAA,0xAA),align=PP_ALIGN.CENTER)
-    add_text(s3,f'Coordenadas: {d.get("coordenadas","—")}\n{d.get("direccion_coords","—")}',
-             Inches(0.5),Inches(6.2),Inches(10),Inches(0.6),size=13,color=GRIS_TEXTO)
+
+    img_mapa_b64 = d.get('img_mapa_credito')
+    if img_mapa_b64:
+        import io as _io
+        from PIL import Image as PILImage
+        img_bytes = base64.b64decode(img_mapa_b64)
+        img = PILImage.open(_io.BytesIO(img_bytes))
+        img_tmp = os.path.join(tmpdir, '_mapa_credito.jpg')
+        img.convert('RGB').save(img_tmp, 'JPEG', quality=92)
+        # Escalar para que quepa en el área del slide
+        iw, ih = img.size
+        max_w, max_h = Inches(12.3), Inches(4.8)
+        scale = min(max_w / iw, max_h / ih)
+        dw, dh = iw * scale, ih * scale
+        x = Inches(0.5) + (max_w - dw) / 2
+        s3.shapes.add_picture(img_tmp, x, Inches(1.35), dw, dh)
+    else:
+        map_box = s3.shapes.add_shape(1,Inches(1.5),Inches(1.35),Inches(10),Inches(4.8))
+        map_box.fill.solid(); map_box.fill.fore_color.rgb=RGBColor(0xEE,0xEE,0xEE)
+        map_box.line.color.rgb=RGBColor(0xCC,0xCC,0xCC)
+        add_text(s3,'[ Insertar captura del mapa GPS ]',Inches(1.5),Inches(3.5),Inches(10),Inches(0.8),
+                 size=14,color=RGBColor(0xAA,0xAA,0xAA),align=PP_ALIGN.CENTER)
+
+    ubicacion = d.get('ubicacion','—')
+    coords = d.get('coordenadas','—')
+    add_text(s3, f'Coordenadas: {coords}',
+             Inches(0.5), Inches(6.0), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
+    add_text(s3, f'Ubicación: {ubicacion}',
+             Inches(0.5), Inches(6.4), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
 
     # ── Slides Resumen ──
-    resumen = d.get('resumen',[])
+    resumen = d.get('resumen', [])
     ROWS_PER_SLIDE = 5
-    for chunk_i in range(0, max(len(resumen),1), ROWS_PER_SLIDE):
+    for chunk_i in range(0, max(len(resumen), 1), ROWS_PER_SLIDE):
         chunk = resumen[chunk_i:chunk_i+ROWS_PER_SLIDE]
+        if not chunk:
+            break
         s = prs.slides.add_slide(blank)
         fondo_blanco(s); add_confidencial(s)
         add_text(s,'Resumen:',Inches(0.5),Inches(0.2),Inches(5),Inches(0.5),size=20,color=GRIS_TEXTO)
@@ -150,13 +174,34 @@ def generar_credito(d, tmpdir):
     fondo_blanco(s_ev); add_confidencial(s_ev)
     add_text(s_ev,'Evidencia de la unidad:',Inches(0.5),Inches(0.3),Inches(8),Inches(0.7),size=24,color=GRIS_TEXTO)
     add_linea_h(s_ev,y=Inches(1.1))
+
+    imgs_ev = d.get('img_evidencias_credito', [])
+    import io as _io
+    from PIL import Image as PILImage
+
     for i in range(3):
         x = Inches(0.4 + i*4.3)
-        ph = s_ev.shapes.add_shape(1,x,Inches(1.25),Inches(4.0),Inches(5.2))
-        ph.fill.solid(); ph.fill.fore_color.rgb=RGBColor(0xEE,0xEE,0xEE)
-        ph.line.color.rgb=RGBColor(0xCC,0xCC,0xCC)
-        add_text(s_ev,f'[ Foto {i+1} ]',x,Inches(3.5),Inches(4.0),Inches(0.5),
-                 size=12,color=RGBColor(0xAA,0xAA,0xAA),align=PP_ALIGN.CENTER)
+        if i < len(imgs_ev) and imgs_ev[i]:
+            try:
+                img_bytes = base64.b64decode(imgs_ev[i])
+                img = PILImage.open(_io.BytesIO(img_bytes)).convert('RGB')
+                iw, ih = img.size
+                max_w, max_h = Inches(4.0), Inches(5.2)
+                scale = min(max_w/iw, max_h/ih)
+                dw, dh = iw*scale, ih*scale
+                img_tmp = os.path.join(tmpdir, f'_ev_credito_{i}.jpg')
+                img.save(img_tmp, 'JPEG', quality=92)
+                s_ev.shapes.add_picture(img_tmp, x, Inches(1.25), dw, dh)
+            except Exception:
+                ph = s_ev.shapes.add_shape(1,x,Inches(1.25),Inches(4.0),Inches(5.2))
+                ph.fill.solid(); ph.fill.fore_color.rgb=RGBColor(0xEE,0xEE,0xEE)
+                ph.line.color.rgb=RGBColor(0xCC,0xCC,0xCC)
+        else:
+            ph = s_ev.shapes.add_shape(1,x,Inches(1.25),Inches(4.0),Inches(5.2))
+            ph.fill.solid(); ph.fill.fore_color.rgb=RGBColor(0xEE,0xEE,0xEE)
+            ph.line.color.rgb=RGBColor(0xCC,0xCC,0xCC)
+            add_text(s_ev,f'[ Foto {i+1} ]',x,Inches(3.5),Inches(4.0),Inches(0.5),
+                     size=12,color=RGBColor(0xAA,0xAA,0xAA),align=PP_ALIGN.CENTER)
 
     # ── Slide Conclusiones ──
     s_conc = prs.slides.add_slide(blank)
