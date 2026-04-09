@@ -103,8 +103,8 @@ def generar_credito(d, tmpdir):
     y_start = Inches(1.55); row_h = Inches(0.38)
     for i,(label,valor) in enumerate(campos):
         y = y_start + i*row_h
-        add_text(s2,label,Inches(0.5),y,Inches(5.5),row_h,size=13,bold=True,color=GRIS_TEXTO)
-        add_text(s2,valor,Inches(6.0),y,Inches(7.0),row_h,size=13,color=GRIS_TEXTO)
+        add_text(s2,label,Inches(0.5),y,Inches(4.0),row_h,size=13,bold=True,color=GRIS_TEXTO)
+        add_text(s2,valor,Inches(4.6),y,Inches(8.5),row_h,size=13,color=GRIS_TEXTO)
 
     # ── Slide 3: Mapa ──
     s3 = prs.slides.add_slide(blank)
