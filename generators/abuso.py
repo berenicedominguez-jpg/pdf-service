@@ -28,7 +28,7 @@ def generar_abuso(d, tmpdir):
     body = '<w:body>'
 
     # ══ HOJA 1 ══
-    body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
+    body += enc_pagina(F, N, M, titulo='REPORTE ABUSO DE CONFIANZA')
     body += tabla(
         enc_sec('RECEPCIÓN DEL REPORTE') +
         fila('Fecha y hora del reporte', d.get('fecha_atencion','—')) +
@@ -59,7 +59,7 @@ def generar_abuso(d, tmpdir):
 
     # ══ HOJA 2 ══ — Descripción + placeholder para mapa (imagen va por ReportLab)
     body += salto()
-    body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
+    body += enc_pagina(F, N, M, titulo='REPORTE ABUSO DE CONFIANZA')
     body += tabla(
         enc_sec('DESCRIPCIÓN DEL EVENTO') +
         fila('Tipo de evento',               'ABUSO DE CONFIANZA') +
@@ -77,7 +77,7 @@ def generar_abuso(d, tmpdir):
 
     # ══ HOJA 3 ══
     body += salto()
-    body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
+    body += enc_pagina(F, N, M, titulo='REPORTE ABUSO DE CONFIANZA')
     body += tabla_texto('ACCIONES REALIZADAS', d.get('acciones','—'))
     body += sep()
     es_rec = 'RECUPERADA' in d.get('resultado','') and 'NO' not in d.get('resultado','')
@@ -92,7 +92,7 @@ def generar_abuso(d, tmpdir):
 
     # ══ HOJA 4 ══ — página con membrete, las imágenes las superpone ReportLab
     body += salto()
-    body += enc_pagina(F, N, M, titulo='REPORTE DE ABUSO DE CONFIANZA')
+    body += enc_pagina(F, N, M, titulo='REPORTE ABUSO DE CONFIANZA')
 
     body += '''<w:sectPr>
   <w:headerReference r:id="rId6" w:type="default"/>
