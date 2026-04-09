@@ -74,21 +74,36 @@ def generar_credito(d, tmpdir):
     # ── Slide 2: Datos del caso ──
     s2 = prs.slides.add_slide(blank)
     fondo_blanco(s2); add_confidencial(s2); add_linea_h(s2,y=Inches(1.4))
+    from datetime import datetime
+    def calcular_dias(f_inicio, f_fin):
+        try:
+            d1 = datetime.strptime(f_inicio.strip(), '%d/%m/%Y')
+            d2 = datetime.strptime(f_fin.strip(), '%d/%m/%Y')
+            return str(abs((d2 - d1).days))
+        except Exception:
+            return '—'
+
+    dias = calcular_dias(d.get('fecha_inicio',''), d.get('fecha_fin',''))
+    unidad = f"{d.get('marca','—')} {d.get('modelo','—')}".strip('— ') or '—'
+
     campos = [
         ('Razón social:',                             d.get('razon_social','—')),
         ('TK:',                                       d.get('tk','—')),
         ('Tipo de entrega:',                          d.get('tipo_entrega','—')),
-        ('Marca / Modelo / Año:',                     f"{d.get('marca','—')} {d.get('modelo','—')} {d.get('anio','—')}"),
+        ('Unidad:',                                   unidad),
+        ('Año:',                                      d.get('anio','—')),
         ('Placas:',                                   d.get('placas','—')),
         ('Entidad:',                                  d.get('entidad','—')),
         ('Nombre del cliente:',                       d.get('nombre','—')),
         ('Motivo:',                                   d.get('motivo','—')),
         ('Fecha inicio seguimiento:',                 d.get('fecha_inicio','—')),
         ('Fecha fin seguimiento:',                    d.get('fecha_fin','—')),
+        ('Días que duró proceso de recuperación:',    dias),
         ('Localidad de gestión:',                     d.get('localidad','—')),
         ('Lugar de recuperación:',                    d.get('lugar_recuperacion_credito','—')),
         ('Fecha de recuperación:',                    d.get('fecha_recuperacion','—')),
         ('Lugar de resguardo:',                       d.get('lugar_resguardo','—')),
+        ('Gestor asignado:',                          d.get('gestor','—')),
     ]
     y_start = Inches(1.55); row_h = Inches(0.38)
     for i,(label,valor) in enumerate(campos):
@@ -153,10 +168,17 @@ def generar_credito(d, tmpdir):
     fondo_blanco(s_conc); add_confidencial(s_conc)
     add_text(s_conc,'Conclusiones:',Inches(0.5),Inches(0.3),Inches(8),Inches(0.7),size=24,color=GRIS_TEXTO)
     add_linea_h(s_conc,y=Inches(1.1))
-    conclusion = d.get('conclusion', 
+    conclusion = d.get('conclusion',
         'Tras el proceso de notificación y el período de gracia otorgado al propietario, se procedió con '
-        'la ejecución de la recuperación siguiendo todos los procedimientos pertinentes.' if exitoso else
-        'Se concluye que el caso deberá ser atendido por el área legal correspondiente.'
+        'la ejecución de la recuperación siguiendo todos los procedimientos pertinentes. El vehículo ha '
+        'sido asegurado y se encuentra en resguardo para su correcta custodia hasta la resolución final del asunto.\n\n'
+        'La recuperación del vehículo no pagado se ha llevado a cabo de manera efectiva y conforme a los '
+        'procesos establecidos.' if exitoso else
+        'Se concluye que el caso deberá ser atendido por el área legal correspondiente de NMDP, derivado '
+        'de que la unidad se encuentra sin reportar desde hace un tiempo considerable y no ha sido posible '
+        'visualizarla en las visitas técnicas realizadas.\n\n'
+        'Por lo anterior, y en conjunto con el personal de NMDP, se determina dar por finalizado el protocolo '
+        'de recuperación, a fin de que el área correspondiente proceda conforme a sus atribuciones.'
     )
     add_text(s_conc, conclusion, Inches(0.5), Inches(1.3), Inches(12.3), Inches(4), size=16, color=GRIS_TEXTO)
 
@@ -166,7 +188,6 @@ def generar_credito(d, tmpdir):
     pdf_path  = os.path.join(tmpdir, f'{folio}.pdf')
     prs.save(pptx_path)
 
-    from .utils import build_docx_pdf
     subprocess.run(
         ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', tmpdir, pptx_path],
         check=True,
