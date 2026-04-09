@@ -89,8 +89,6 @@ def generar_abuso(d, tmpdir):
         fila('Lugar de remisión',        d.get('lugar_remision','N/A'), True) +
         fila('Entregado al cliente',     d.get('entregado_cliente','NO'))
     )
-    body += sep()
-    body += tabla_texto('OBSERVACIONES ADICIONALES', d.get('observaciones','—'))
 
     # ══ HOJA 4 ══ — página con membrete, las imágenes las superpone ReportLab
     body += salto()
