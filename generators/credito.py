@@ -87,22 +87,17 @@ def generar_credito(d, tmpdir):
     unidad = f"{d.get('marca','—')} {d.get('modelo','—')}".strip('— ') or '—'
 
     campos = [
-        ('Razón social:',                             d.get('razon_social','—')),
-        ('TK:',                                       d.get('tk','—')),
-        ('Tipo de entrega:',                          d.get('tipo_entrega','—')),
+        ('Nombre de cliente:',                        d.get('nombre','—')),
         ('Unidad:',                                   unidad),
         ('Año:',                                      d.get('anio','—')),
         ('Placas:',                                   d.get('placas','—')),
-        ('Entidad:',                                  d.get('entidad','—')),
-        ('Nombre del cliente:',                       d.get('nombre','—')),
-        ('Motivo:',                                   d.get('motivo','—')),
-        ('Fecha inicio seguimiento:',                 d.get('fecha_inicio','—')),
-        ('Fecha fin seguimiento:',                    d.get('fecha_fin','—')),
-        ('Días que duró proceso de recuperación:',    dias),
+        ('Estatus:',                                  'Recuperación Exitosa' if exitoso else 'No Exitosa'),
+        ('Motivo de recuperación:',                   d.get('motivo','—')),
+        ('Fecha de inicio de seguimiento:',           d.get('fecha_inicio','—')),
+        ('Fecha de finalización de seguimiento:',     d.get('fecha_fin','—')),
         ('Localidad de gestión:',                     d.get('localidad','—')),
-        ('Lugar de recuperación:',                    d.get('lugar_recuperacion_credito','—')),
-        ('Fecha de recuperación:',                    d.get('fecha_recuperacion','—')),
         ('Lugar de resguardo:',                       d.get('lugar_resguardo','—')),
+        ('Días que duró proceso de recuperación:',    dias),
         ('Gestor asignado:',                          d.get('gestor','—')),
     ]
     y_start = Inches(1.55); row_h = Inches(0.38)
