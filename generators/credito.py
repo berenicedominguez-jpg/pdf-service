@@ -138,9 +138,9 @@ def generar_credito(d, tmpdir):
     ubicacion = d.get('ubicacion','—')
     coords = d.get('coordenadas','—')
     add_text(s3, f'Coordenadas: {coords}',
-             Inches(0.5), Inches(6.0), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
+             Inches(0.5), Inches(6.2), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
     add_text(s3, f'Ubicación: {ubicacion}',
-             Inches(0.5), Inches(6.4), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
+             Inches(0.5), Inches(6.6), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
 
     # ── Slides Resumen ──
     resumen = d.get('resumen', [])
