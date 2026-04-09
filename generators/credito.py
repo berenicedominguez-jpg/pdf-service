@@ -75,18 +75,20 @@ def generar_credito(d, tmpdir):
     s2 = prs.slides.add_slide(blank)
     fondo_blanco(s2); add_confidencial(s2); add_linea_h(s2,y=Inches(1.4))
     campos = [
-        ('Nombre de cliente:',                        d.get('nombre','—')),
-        ('Unidad:',                                   d.get('unidad','—')),
-        ('Año:',                                      d.get('anio','—')),
+        ('Razón social:',                             d.get('razon_social','—')),
+        ('TK:',                                       d.get('tk','—')),
+        ('Tipo de entrega:',                          d.get('tipo_entrega','—')),
+        ('Marca / Modelo / Año:',                     f"{d.get('marca','—')} {d.get('modelo','—')} {d.get('anio','—')}"),
         ('Placas:',                                   d.get('placas','—')),
-        ('Estatus:',                                  'Recuperación Exitosa' if exitoso else 'No Recuperado'),
-        ('Motivo de recuperación:',                   d.get('motivo','—')),
-        ('Fecha de inicio de seguimiento:',           d.get('fecha_inicio','—')),
-        ('Fecha de finalización de seguimiento:',     d.get('fecha_fin','—')),
+        ('Entidad:',                                  d.get('entidad','—')),
+        ('Nombre del cliente:',                       d.get('nombre','—')),
+        ('Motivo:',                                   d.get('motivo','—')),
+        ('Fecha inicio seguimiento:',                 d.get('fecha_inicio','—')),
+        ('Fecha fin seguimiento:',                    d.get('fecha_fin','—')),
         ('Localidad de gestión:',                     d.get('localidad','—')),
+        ('Lugar de recuperación:',                    d.get('lugar_recuperacion_credito','—')),
+        ('Fecha de recuperación:',                    d.get('fecha_recuperacion','—')),
         ('Lugar de resguardo:',                       d.get('lugar_resguardo','—')),
-        ('Días que duró proceso de recuperación:',    d.get('dias','—')),
-        ('Gestor asignado:',                          d.get('gestor','—')),
     ]
     y_start = Inches(1.55); row_h = Inches(0.38)
     for i,(label,valor) in enumerate(campos):
@@ -151,19 +153,12 @@ def generar_credito(d, tmpdir):
     fondo_blanco(s_conc); add_confidencial(s_conc)
     add_text(s_conc,'Conclusiones:',Inches(0.5),Inches(0.3),Inches(8),Inches(0.7),size=24,color=GRIS_TEXTO)
     add_linea_h(s_conc,y=Inches(1.1))
-    if exitoso:
-        conclusion = ('Tras el proceso de notificación y el período de gracia otorgado al propietario, se procedió con '
-                      'la ejecución de la recuperación siguiendo todos los procedimientos pertinentes. El vehículo ha '
-                      'sido asegurado y se encuentra en resguardo para su correcta custodia hasta la resolución final del asunto.\n\n'
-                      'La recuperación del vehículo no pagado se ha llevado a cabo de manera efectiva y conforme a los '
-                      'procesos establecidos.')
-    else:
-        conclusion = ('Se concluye que el caso deberá ser atendido por el área legal correspondiente de NMDP, derivado '
-                      'de que la unidad se encuentra sin reportar desde hace un tiempo considerable y no ha sido posible '
-                      'visualizarla en las visitas técnicas realizadas.\n\n'
-                      'Por lo anterior, y en conjunto con el personal de NMDP, se determina dar por finalizado el protocolo '
-                      'de recuperación, a fin de que el área correspondiente proceda conforme a sus atribuciones.')
-    add_text(s_conc,conclusion,Inches(0.5),Inches(1.3),Inches(12.3),Inches(4),size=16,color=GRIS_TEXTO)
+    conclusion = d.get('conclusion', 
+        'Tras el proceso de notificación y el período de gracia otorgado al propietario, se procedió con '
+        'la ejecución de la recuperación siguiendo todos los procedimientos pertinentes.' if exitoso else
+        'Se concluye que el caso deberá ser atendido por el área legal correspondiente.'
+    )
+    add_text(s_conc, conclusion, Inches(0.5), Inches(1.3), Inches(12.3), Inches(4), size=16, color=GRIS_TEXTO)
 
     # ── Guardar y convertir ──
     folio = d.get('folio','REPORTE')
