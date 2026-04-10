@@ -32,8 +32,24 @@ def generar_pdf():
             with open(pdf_path, 'rb') as f:
                 pdf_b64 = base64.b64encode(f.read()).decode('utf-8')
 
-        nombre = f"{datos.get('folio','REPORTE')} {datos.get('cliente','CLIENTE')}.pdf"
-        return jsonify({'ok': True, 'pdf': pdf_b64, 'nombre': nombre})
+            # Buscar también el docx o pptx generado
+            folio = datos.get('folio', 'REPORTE')
+            doc_b64 = None
+            doc_nombre = None
+            for ext in ['_final.pdf', '.docx', '.pptx']:
+                candidate = os.path.join(tmpdir, f'{folio}{ext}')
+                if ext not in ('_final.pdf',) and os.path.exists(candidate):
+                    with open(candidate, 'rb') as f:
+                        doc_b64 = base64.b64encode(f.read()).decode('utf-8')
+                    doc_nombre = f"{folio} {datos.get('cliente','CLIENTE')}{ext}"
+                    break
+
+        nombre = f"{datos.get('folio','REPORTE')} {datos.get('cliente','CLIENTE') or datos.get('nombre','CLIENTE')}.pdf"
+        resp = {'ok': True, 'pdf': pdf_b64, 'nombre': nombre}
+        if doc_b64:
+            resp['doc'] = doc_b64
+            resp['doc_nombre'] = doc_nombre
+        return jsonify(resp)
 
     except Exception as e:
         import traceback
