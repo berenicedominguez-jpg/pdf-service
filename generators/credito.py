@@ -123,13 +123,13 @@ def generar_credito(d, tmpdir):
         img.convert('RGB').save(img_tmp, 'JPEG', quality=92)
         # Escalar para que quepa en el área del slide
         iw, ih = img.size
-        max_w, max_h = Inches(12.3), Inches(4.8)
+        max_w, max_h = Inches(12.3), Inches(4.5)
         scale = min(max_w / iw, max_h / ih)
         dw, dh = iw * scale, ih * scale
         x = Inches(0.5) + (max_w - dw) / 2
         s3.shapes.add_picture(img_tmp, x, Inches(1.35), dw, dh)
     else:
-        map_box = s3.shapes.add_shape(1,Inches(1.5),Inches(1.35),Inches(10),Inches(4.8))
+        map_box = s3.shapes.add_shape(1,Inches(1.5),Inches(1.35),Inches(10),Inches(4.5))
         map_box.fill.solid(); map_box.fill.fore_color.rgb=RGBColor(0xEE,0xEE,0xEE)
         map_box.line.color.rgb=RGBColor(0xCC,0xCC,0xCC)
         add_text(s3,'[ Insertar captura del mapa GPS ]',Inches(1.5),Inches(3.5),Inches(10),Inches(0.8),
@@ -138,9 +138,9 @@ def generar_credito(d, tmpdir):
     ubicacion = d.get('ubicacion','—')
     coords = d.get('coordenadas','—')
     add_text(s3, f'Coordenadas: {coords}',
-             Inches(0.5), Inches(6.2), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
+             Inches(0.5), Inches(6.55), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
     add_text(s3, f'Ubicación: {ubicacion}',
-             Inches(0.5), Inches(6.6), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
+             Inches(0.5), Inches(6.95), Inches(12), Inches(0.4), size=13, color=GRIS_TEXTO)
 
     # ── Slides Resumen ──
     resumen = d.get('resumen', [])
