@@ -14,6 +14,18 @@ LOGO_NUMARIS = os.path.join(BASE_DIR, 'assets', 'numaris_logo.png')
 AZUL='1B2A4A'; AZUL_MED='EEF2F8'; VERDE='C6EFCE'; VERDE_T='276221'
 BLANCO='FFFFFF'; BORDE='C5D0E4'; ROJO='C00000'
 
+
+def xml_escape(txt):
+    """Escapa caracteres especiales para XML válido."""
+    if not txt:
+        return txt
+    return (str(txt)
+        .replace('&', '&amp;')
+        .replace('<', '&lt;')
+        .replace('>', '&gt;')
+        .replace('"', '&quot;'))
+
+
 def lbl(txt, compact=False):
     p = '38' if compact else '55'
     l = '220' if compact else '255'
@@ -25,7 +37,7 @@ def lbl(txt, compact=False):
   </w:tcPr>
   <w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="{l}" w:lineRule="exact"/></w:pPr>
     <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="{AZUL}"/><w:sz w:val="{f}"/><w:szCs w:val="{f}"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-    <w:t xml:space="preserve">{txt}</w:t></w:r></w:p></w:tc>'''
+    <w:t xml:space="preserve">{xml_escape(txt)}</w:t></w:r></w:p></w:tc>'''
 
 def val(txt, shade=False, verde=False, rojo=False, compact=False):
     fill  = VERDE if verde else (AZUL_MED if shade else BLANCO)
@@ -42,7 +54,7 @@ def val(txt, shade=False, verde=False, rojo=False, compact=False):
   </w:tcPr>
   <w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="{l}" w:lineRule="exact"/></w:pPr>
     <w:r><w:rPr>{bold}<w:color w:val="{color}"/><w:sz w:val="{f}"/><w:szCs w:val="{f}"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-    <w:t xml:space="preserve">{txt}</w:t></w:r></w:p></w:tc>'''
+    <w:t xml:space="preserve">{xml_escape(txt)}</w:t></w:r></w:p></w:tc>'''
 
 def fila(l_txt, v_txt, shade=False, verde=False, rojo=False, compact=False):
     return f'<w:tr><w:trPr><w:cantSplit/></w:trPr>{lbl(l_txt,compact)}{val(v_txt,shade,verde,rojo,compact)}</w:tr>'
@@ -57,7 +69,7 @@ def enc_sec(titulo, compact=False):
   </w:tcPr>
   <w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr>
     <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="FFFFFF"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-    <w:t>{titulo}</w:t></w:r></w:p>
+    <w:t>{xml_escape(titulo)}</w:t></w:r></w:p>
   </w:tc></w:tr>'''
 
 def tabla(filas_xml):
@@ -82,7 +94,7 @@ def tabla_texto(titulo, texto):
     </w:tcPr>
     <w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr>
       <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="FFFFFF"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-      <w:t>{titulo}</w:t></w:r></w:p>
+      <w:t>{xml_escape(titulo)}</w:t></w:r></w:p>
     </w:tc>
   </w:tr>
   <w:tr><w:trPr><w:cantSplit/></w:trPr>
@@ -93,7 +105,7 @@ def tabla_texto(titulo, texto):
     </w:tcPr>
     <w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="300" w:lineRule="auto"/></w:pPr>
       <w:r><w:rPr><w:color w:val="222222"/><w:sz w:val="17"/><w:szCs w:val="17"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-      <w:t xml:space="preserve">{texto}</w:t></w:r></w:p>
+      <w:t xml:space="preserve">{xml_escape(texto)}</w:t></w:r></w:p>
     </w:tc>
   </w:tr>
 </w:tbl>'''
@@ -111,10 +123,10 @@ def enc_pagina(folio, nick, monitorista, titulo='INFORME DE CASO'):
   </w:pPr>
   <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="{AZUL}"/><w:sz w:val="42"/><w:szCs w:val="42"/>
     <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-    <w:t>{titulo}</w:t></w:r>
+    <w:t>{xml_escape(titulo)}</w:t></w:r>
   <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="{AZUL}"/><w:sz w:val="42"/><w:szCs w:val="42"/>
     <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-    <w:tab/><w:t>FOLIO: {folio}</w:t></w:r>
+    <w:tab/><w:t>FOLIO: {xml_escape(folio)}</w:t></w:r>
 </w:p>
 <w:p>
   <w:pPr><w:spacing w:before="0" w:after="120"/><w:keepNext/>
@@ -123,10 +135,10 @@ def enc_pagina(folio, nick, monitorista, titulo='INFORME DE CASO'):
   </w:pPr>
   <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="{AZUL}"/><w:sz w:val="18"/><w:szCs w:val="18"/>
     <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-    <w:t>UNIDAD: {nick}</w:t></w:r>
+    <w:t>UNIDAD: {xml_escape(nick)}</w:t></w:r>
   <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="{AZUL}"/><w:sz w:val="18"/><w:szCs w:val="18"/>
     <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-    <w:tab/><w:t>ATIENDE: {monitorista}</w:t></w:r>
+    <w:tab/><w:t>ATIENDE: {xml_escape(monitorista)}</w:t></w:r>
 </w:p>'''
 
 def imagen_placeholder(titulo, alto=3000):
@@ -143,7 +155,7 @@ def imagen_placeholder(titulo, alto=3000):
     </w:tcPr>
     <w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr>
       <w:r><w:rPr><w:b/><w:bCs/><w:color w:val="FFFFFF"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
-      <w:t>{titulo}</w:t></w:r></w:p>
+      <w:t>{xml_escape(titulo)}</w:t></w:r></w:p>
     </w:tc>
   </w:tr>
   <w:tr>
@@ -193,10 +205,6 @@ def agregar_imagen_al_docx(dst, img_b64, nombre_archivo, rId, cx_emu=None, cy_em
 
 
 def _imagen_pdf(b64_str, titulo, tmpdir, idx, max_h_pts):
-    """
-    Genera un PDF de una sola página con la imagen completa escalada.
-    max_h_pts: alto máximo disponible en puntos para la imagen.
-    """
     from reportlab.lib.pagesizes import A4
     from reportlab.pdfgen import canvas as rl_canvas
     from reportlab.lib.units import cm
@@ -205,15 +213,14 @@ def _imagen_pdf(b64_str, titulo, tmpdir, idx, max_h_pts):
 
     W, H = A4
     MARGIN = 1.8 * cm
-    TITLE_H = 18  # pts para barra de título
+    TITLE_H = 18
     AVAIL_W = W - 2 * MARGIN
-    AVAIL_H = max_h_pts - TITLE_H - 6  # espacio para imagen
+    AVAIL_H = max_h_pts - TITLE_H - 6
 
     img_bytes = base64.b64decode(b64_str)
     img = PILImage.open(_io.BytesIO(img_bytes)).convert('RGB')
     iw, ih = img.size
 
-    # Escalar para caber sin recorte
     scale = min(AVAIL_W / iw, AVAIL_H / ih)
     dw = iw * scale
     dh = ih * scale
@@ -224,14 +231,12 @@ def _imagen_pdf(b64_str, titulo, tmpdir, idx, max_h_pts):
     out = os.path.join(tmpdir, f'_img_page_{idx}.pdf')
     c = rl_canvas.Canvas(out, pagesize=(W, max_h_pts))
 
-    # Barra azul de título
     c.setFillColorRGB(0.106, 0.165, 0.290)
     c.rect(MARGIN, max_h_pts - TITLE_H, AVAIL_W, TITLE_H, fill=1, stroke=0)
     c.setFillColorRGB(1, 1, 1)
     c.setFont('Helvetica-Bold', 9)
     c.drawString(MARGIN + 6, max_h_pts - TITLE_H + 5, titulo)
 
-    # Imagen centrada
     x = MARGIN + (AVAIL_W - dw) / 2
     y = (AVAIL_H - dh) / 2
     c.drawImage(img_tmp, x, y, width=dw, height=dh)
@@ -240,7 +245,7 @@ def _imagen_pdf(b64_str, titulo, tmpdir, idx, max_h_pts):
 
 
 def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None):
-    # ── Sanitizar nombre para evitar problemas con caracteres especiales ──
+    # ── Sanitizar nombre para evitar problemas con caracteres especiales en rutas ──
     nombre = re.sub(r'[^\w\s-]', '', nombre.replace('&', 'y')).strip().replace(' ', '_')
 
     from pypdf import PdfWriter, PdfReader
@@ -257,14 +262,14 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
     dst = os.path.join(tmpdir, 'doc')
     shutil.copytree(MEMBRETE, dst)
 
-    # 3. Sustituir body
+    # 2. Sustituir body
     with open(os.path.join(MEMBRETE, 'word', 'document.xml'), 'r', encoding='utf-8') as f:
         orig = f.read()
     new_doc = orig[:orig.find('<w:background')] + body_xml + '</w:document>'
     with open(os.path.join(dst, 'word', 'document.xml'), 'w', encoding='utf-8') as f:
         f.write(new_doc)
 
-    # 4. Empaquetar .docx
+    # 3. Empaquetar .docx
     docx_path = os.path.join(tmpdir, f'{nombre}.docx')
     with zipfile.ZipFile(docx_path, 'w', zipfile.ZIP_DEFLATED) as zf:
         for root, dirs, files in os.walk(dst):
@@ -273,7 +278,7 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
                 arc_name = os.path.relpath(abs_path, dst)
                 zf.write(abs_path, arc_name)
 
-    # 5. Convertir a PDF con LibreOffice
+    # 4. Convertir a PDF con LibreOffice
     subprocess.run(
         ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', tmpdir, docx_path],
         check=True, env={**os.environ, 'HOME': tmpdir}
@@ -291,10 +296,9 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
     writer = PdfWriter()
 
     for i, page in enumerate(reader_main.pages):
-        page_num = i + 1  # 1-based
+        page_num = i + 1
 
         if page_num == 2 and mapa:
-            # ── Hoja 2: superponer imagen del mapa sobre la página de LibreOffice ──
             TEXT_BOTTOM_Y = 210
             IMG_TOP_Y = H - TEXT_BOTTOM_Y
             AVAIL_H_MAPA = IMG_TOP_Y - 20
