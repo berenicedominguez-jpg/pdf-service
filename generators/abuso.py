@@ -63,7 +63,7 @@ def generar_abuso(d, tmpdir):
     body += tabla(
         enc_sec('DESCRIPCIÓN DEL EVENTO') +
         fila('Tipo de evento',               'ABUSO DE CONFIANZA') +
-        fila('Lugar del evento',             d.get('estado_rep','—'), True) +
+        fila('Estado del evento',             d.get('estado_rep','—'), True) +
         fila('Fecha aproximada del robo',    d.get('fecha_robo','—')) +
         fila('Hora aproximada del robo',     d.get('hora_robo','—'), True) +
         fila('Folio de predenuncia',         d.get('folio_predenuncia','—')) +
