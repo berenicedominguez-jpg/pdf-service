@@ -1,4 +1,4 @@
-import os, subprocess, shutil, zipfile, base64
+import os, subprocess, shutil, zipfile, base64, re
 
 BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEMBRETE_ZIP = os.path.join(BASE_DIR, 'membrete.zip')
@@ -240,18 +240,9 @@ def _imagen_pdf(b64_str, titulo, tmpdir, idx, max_h_pts):
 
 
 def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None):
-    """
-    Genera PDF de 4 hojas:
-    - Hoja 1: Recepción + Datos (LibreOffice)
-    - Hoja 2: Descripción + Mapa (LibreOffice texto + ReportLab imagen superpuesta)
-    - Hoja 3: Acciones + Estatus + Observaciones (LibreOffice)
-    - Hoja 4: Evidencia 1 + Evidencia 2 (ReportLab, ambas en una página)
+    # ── Sanitizar nombre para evitar problemas con caracteres especiales ──
+    nombre = re.sub(r'[^\w\s-]', '', nombre.replace('&', 'y')).strip().replace(' ', '_')
 
-    evidencias_pdf: lista de dicts con claves:
-      - 'titulo': str
-      - 'b64': str (base64)
-      - 'tipo': 'mapa' | 'evidencia'
-    """
     from pypdf import PdfWriter, PdfReader
     from reportlab.lib.pagesizes import A4
     from reportlab.pdfgen import canvas as rl_canvas
@@ -304,15 +295,10 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
 
         if page_num == 2 and mapa:
             # ── Hoja 2: superponer imagen del mapa sobre la página de LibreOffice ──
-            # La página de LO tiene texto hasta ~300pts desde arriba (A4=842)
-            # La imagen va desde ~300pts hacia abajo
-
-            # Posición justo debajo de la barra LUGAR DEL EVENTO
-            TEXT_BOTTOM_Y = 210  # ajustado para pegar imagen a la barra
+            TEXT_BOTTOM_Y = 210
             IMG_TOP_Y = H - TEXT_BOTTOM_Y
             AVAIL_H_MAPA = IMG_TOP_Y - 20
 
-            # Generar overlay con solo la imagen del mapa
             overlay_path = os.path.join(tmpdir, '_mapa_overlay.pdf')
             c = rl_canvas.Canvas(overlay_path, pagesize=A4)
 
@@ -331,7 +317,6 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
             c.drawImage(img_tmp, x, y, width=dw, height=dh)
             c.save()
 
-            # Fusionar página LO + overlay mapa
             overlay_reader = PdfReader(overlay_path)
             page.merge_page(overlay_reader.pages[0])
             writer.add_page(page)
@@ -341,16 +326,13 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
 
     # ── Hoja 4: superponer evidencias sobre la página con membrete ──
     if evids:
-        # La página 4 ya tiene el membrete — superponemos las imágenes
         ev_overlay_path = os.path.join(tmpdir, '_evidencias_overlay.pdf')
         c = rl_canvas.Canvas(ev_overlay_path, pagesize=A4)
         AVAIL_W = W - 2 * MARGIN
 
-        # Espacio disponible debajo del encabezado
-        # Encabezado ~100pts, dejar margen inferior 20pts
-        CONTENT_TOP = H - 105  # justo debajo del encabezado
-        FOOTER_H = 60  # espacio del footer del membrete
-        CONTENT_H = CONTENT_TOP - FOOTER_H  # no tocar el footer
+        CONTENT_TOP = H - 105
+        FOOTER_H = 60
+        CONTENT_H = CONTENT_TOP - FOOTER_H
 
         n = len(evids)
         slot_h = CONTENT_H / n
@@ -360,14 +342,12 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
             slot_top = CONTENT_TOP - idx * slot_h
             slot_bottom = slot_top - slot_h
 
-            # Barra título azul
             c.setFillColorRGB(0.106, 0.165, 0.290)
             c.rect(MARGIN, slot_top - TITLE_H, AVAIL_W, TITLE_H, fill=1, stroke=0)
             c.setFillColorRGB(1, 1, 1)
             c.setFont('Helvetica-Bold', 9)
             c.drawString(MARGIN + 6, slot_top - TITLE_H + 5, ev.get('titulo', 'EVIDENCIA'))
 
-            # Imagen escalada
             img_bytes = base64.b64decode(ev['b64'])
             img = PILImage.open(_io.BytesIO(img_bytes)).convert('RGB')
             iw, ih = img.size
@@ -385,8 +365,7 @@ def build_docx_pdf(body_xml, tmpdir, nombre, imagenes=None, evidencias_pdf=None)
         c.showPage()
         c.save()
 
-        # Fusionar overlay con página 4 (que tiene el membrete)
-        page4_idx = 3  # índice 0-based de la página 4
+        page4_idx = 3
         if page4_idx < len(writer.pages):
             overlay_reader = PdfReader(ev_overlay_path)
             writer.pages[page4_idx].merge_page(overlay_reader.pages[0])
